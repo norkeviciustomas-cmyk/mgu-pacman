@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>BMW MGU Pac-Man Ultra Smooth</title>
+<title>BMW MGU Pac-Man Levels</title>
 <style>
 body{background:#0b0e14;color:#fff;font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;overflow:hidden;touch-action:none}
-.h{display:flex;justify-content:space-between;width:368px;font-size:20px;font-weight:bold;margin-bottom:6px}
+.h{display:flex;justify-content:space-between;width:368px;font-size:18px;font-weight:bold;margin-bottom:6px}
 canvas{border:3px solid #0066B1;background:#000}
 .btns{display:flex;gap:8px;margin-top:8px}
 button{background:#1c2433;color:#fff;border:1px solid #0066B1;padding:10px 16px;font-size:16px;border-radius:6px;cursor:pointer}
@@ -14,18 +14,23 @@ button:active,button:focus{background:#0066B1;outline:none}
 </style>
 </head>
 <body>
-<div class="h"><div>TAŠKAI: <span id="s">0</span></div><div id="st" style="color:#FFD700"></div></div>
+<div class="h">
+<div>TAŠKAI: <span id="s">0</span></div>
+<div style="color:#4da6ff">LYGIS: <span id="lv">1</span></div>
+<div id="st" style="color:#FFD700"></div>
+</div>
 <canvas id="c" width="368" height="368"></canvas>
 <div class="btns">
 <button onclick="nd=3">▲</button>
 <button onclick="nd=2">◀</button>
 <button onclick="nd=1">▼</button>
 <button onclick="nd=0">▶</button>
-<button onclick="init()">Iš naujo</button>
+<button onclick="init(true)">Iš naujo</button>
 </div>
 <script>
-const c=document.getElementById("c"),ctx=c.getContext("2d"),sE=document.getElementById("s"),stE=document.getElementById("st"),T=23,R=16,C=16,SPD=4.4;
-const L=[
+const c=document.getElementById("c"),ctx=c.getContext("2d"),sE=document.getElementById("s"),lvE=document.getElementById("lv"),stE=document.getElementById("st"),T=23,R=16,C=16,SPD=4.4;
+const MAPS=[
+[
 "################",
 "#o.....##.....o#",
 "#.###..##..###.#",
@@ -42,12 +47,36 @@ const L=[
 "#o.....##.....o#",
 "#..............#",
 "################"
+],
+[
+"################",
+"#o.....##.....o#",
+"#.##.#.##.#.##.#",
+"#o...#....#...o#",
+"#.####.  .####.#",
+"#.....#  #.....#",
+"#.###.#  #.###.#",
+"#..o..#  #..o..#",
+"#.###.####.###.#",
+"#.....o..o.....#",
+"#.##.######.##.#",
+"#o...o....o...o#",
+"#.##.######.##.#",
+"#......##......#",
+"#.####.##.####.#",
+"################"
+]
 ];
 const D=[{x:1,y:0},{x:0,y:1},{x:-1,y:0},{x:0,y:-1}];
-let m=[],sc=0,over=0,pw=0,cd=0,nd=0,p={},g=[],lt=0;
+let m=[],sc=0,lvl=1,over=0,wait=0,pw=0,cd=0,nd=0,p={},g=[],lt=0;
 function turn(s){nd=(cd+s+4)%4}
-function init(){
-m=L.map(r=>r.split(""));sc=0;over=0;pw=0;sE.innerText=0;stE.innerText="";cd=0;nd=0;
+function init(resetAll){
+if(resetAll){sc=0;lvl=1;}
+let L=MAPS[(lvl-1)%MAPS.length];
+m=L.map(r=>r.split(""));
+over=0;wait=0;pw=0;
+sE.innerText=sc;lvE.innerText=lvl;stE.innerText="";
+cd=0;nd=0;
 p={x:1,y:1,dx:1,dy:0};
 g=[
 {x:7,y:6,c:"#F00",dx:0,dy:-1},
@@ -60,7 +89,8 @@ lt=performance.now();
 }
 function ok(x,y){return x>=0&&x<C&&y>=0&&y<R&&m[y][x]!=="#"}
 function stepEnt(e,dt,isP){
-let step=SPD*dt*(isP?1:0.92);
+let gMult=Math.min(1.18,0.90+(lvl-1)*0.06);
+let step=SPD*dt*(isP?1:gMult);
 while(step>0){
 let gx=Math.round(e.x),gy=Math.round(e.y);
 let dist=Math.hypot(gx-e.x,gy-e.y);
@@ -75,7 +105,18 @@ let vd=D.filter(k=>ok(gx+k.x,gy+k.y));
 let nr=vd.filter(k=>!(k.x===-e.dx&&k.y===-e.dy));
 if(nr.length)vd=nr;
 if(vd.length){
-let ch=vd[Math.floor(Math.random()*vd.length)];
+let ch;
+let smart=Math.min(0.75,(lvl-1)*0.22);
+if(Math.random()<smart){
+vd.sort((a,b)=>{
+let da=Math.hypot((gx+a.x)-p.x,(gy+a.y)-p.y);
+let db=Math.hypot((gx+b.x)-p.x,(gy+b.y)-p.y);
+return pw>0?(db-da):(da-db);
+});
+ch=vd[0];
+}else{
+ch=vd[Math.floor(Math.random()*vd.length)];
+}
 e.dx=ch.x;e.dy=ch.y;
 }else{e.dx=0;e.dy=0;break}
 }
@@ -97,16 +138,25 @@ e.x=Math.round(e.x);e.y=Math.round(e.y);
 }
 }
 function upd(dt){
-if(over)return;
+if(over||wait)return;
 if(pw>0)pw=Math.max(0,pw-dt);
 stepEnt(p,dt,true);
 let px=Math.round(p.x),py=Math.round(p.y);
 if(Math.hypot(p.x-px,p.y-py)<0.35){
 let v=m[py][px];
 if(v==="."){m[py][px]=" ";sc+=10;sE.innerText=sc}
-else if(v==="o"){m[py][px]=" ";sc+=50;pw=9;sE.innerText=sc}
+else if(v==="o"){
+m[py][px]=" ";sc+=50;
+pw=Math.max(3,9-(lvl-1)*1.2);
+sE.innerText=sc;
 }
-if(!m.some(r=>r.includes(".")||r.includes("o"))){over=1;stE.innerText="LAIMĖJOTE!";return}
+}
+if(!m.some(r=>r.includes(".")||r.includes("o"))){
+wait=1;lvl++;
+stE.innerText="LYGIS "+lvl+"!";
+setTimeout(()=>init(false),1500);
+return;
+}
 g.forEach(gh=>{
 stepEnt(gh,dt,false);
 if(!over&&Math.hypot(p.x-gh.x,p.y-gh.y)<0.65){
@@ -154,7 +204,7 @@ if(e.key==="ArrowRight")nd=0;
 if(e.key==="ArrowDown")nd=1;
 if(e.key==="ArrowLeft")nd=2;
 if(e.key==="ArrowUp")nd=3;
-if(e.key==="Enter"||e.key==="r")init();
+if(e.key==="Enter"||e.key==="r")init(true);
 });
 let tx=0,ty=0;
 document.addEventListener("touchstart",e=>{
@@ -168,7 +218,7 @@ if(Math.abs(dx)>Math.abs(dy)){if(dx>20)nd=0;else if(dx<-20)nd=2}
 else{if(dy>20)nd=1;else if(dy<-20)nd=3}
 }
 });
-init();
+init(true);
 requestAnimationFrame(loop);
 </script>
 </body>
