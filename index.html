@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>BMW MGU Pac-Man v3</title>
+<title>BMW MGU Pac-Man v4</title>
 <style>
 body{background:#0b0e14;color:#fff;font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;overflow:hidden;touch-action:none}
 .h{display:flex;justify-content:space-between;width:368px;font-size:15px;font-weight:bold;margin-bottom:4px}
@@ -18,7 +18,7 @@ button:active,button:focus{background:#0066B1;outline:none}
 <div class="h">
 <div>TAŠKAI: <span id="s">0</span></div>
 <div style="color:#FFD700">REKORDAS: <span id="hs">0</span></div>
-<div style="color:#4da6ff">LYGIS: <span id="lv">1</span> <small style="color:#666">v3</small></div>
+<div style="color:#4da6ff">LYGIS: <span id="lv">1</span> <small style="color:#666">v4</small></div>
 </div>
 <div id="st" class="st-bar"></div>
 <canvas id="c" width="368" height="368"></canvas>
@@ -73,7 +73,7 @@ const MAPS=[
 "################",
 "#o.....##.....o#",
 "#.####.##.####.#",
-"#......##......#",
+"#......  ......#",
 "#.###.#  #.###.#",
 "#...#.#  #.#...#",
 "#.#...#  #...#.#",
@@ -114,15 +114,23 @@ lvE.innerText=lvl;stE.innerText="";
 cd=0;nd=0;
 p={x:1,y:1,dx:1,dy:0};
 g=[
-{x:7,y:6,c:"#F00",dx:0,dy:-1,alive:true},
-{x:8,y:6,c:"#FBF",dx:0,dy:-1,alive:true},
-{x:7,y:7,c:"#0FF",dx:0,dy:-1,alive:true},
-{x:8,y:7,c:"#FA0",dx:0,dy:-1,alive:true},
-{x:7,y:5,c:"#0F0",dx:0,dy:-1,alive:true}
+{x:7,y:6,c:"#F00",dx:0,dy:-1,alive:true,ai:0},
+{x:8,y:6,c:"#FBF",dx:0,dy:-1,alive:true,ai:1},
+{x:7,y:7,c:"#0FF",dx:0,dy:-1,alive:true,ai:2},
+{x:8,y:7,c:"#FA0",dx:0,dy:-1,alive:true,ai:3},
+{x:7,y:5,c:"#0F0",dx:0,dy:-1,alive:true,ai:4}
 ];
 lt=performance.now();
 }
 function ok(x,y){return x>=0&&x<C&&y>=0&&y<R&&m[y][x]!=="#"}
+function getTarget(gh){
+if(gh.y>=5&&gh.y<=7&&(gh.x===7||gh.x===8))return{x:7,y:3};
+if(gh.ai===0)return{x:p.x,y:p.y};
+if(gh.ai===1)return{x:p.x+p.dx*3,y:p.y+p.dy*3};
+if(gh.ai===2){let r=g[0];return{x:p.x*2-r.x,y:p.y*2-r.y};}
+if(gh.ai===3){return Math.hypot(gh.x-p.x,gh.y-p.y)>4?{x:p.x,y:p.y}:{x:1,y:14};}
+return{x:p.x-p.dx*2,y:p.y-p.dy*2};
+}
 function stepEnt(e,dt,isP){
 let gMult=Math.min(1.18,0.88+(lvl-1)*0.06);
 let step=SPD*dt*(isP?1:gMult);
@@ -149,11 +157,12 @@ let nr=vd.filter(k=>!(k.x===-e.dx&&k.y===-e.dy));
 if(nr.length)vd=nr;
 if(vd.length){
 let ch;
-let smart=Math.min(0.75,(lvl-1)*0.22);
+let smart=Math.min(0.95,0.45+(lvl-1)*0.20);
 if(Math.random()<smart){
+let tgt=getTarget(e);
 vd.sort((a,b)=>{
-let da=Math.hypot((gx+a.x)-p.x,(gy+a.y)-p.y);
-let db=Math.hypot((gx+b.x)-p.x,(gy+b.y)-p.y);
+let da=Math.hypot((gx+a.x)-tgt.x,(gy+a.y)-tgt.y);
+let db=Math.hypot((gx+b.x)-tgt.x,(gy+b.y)-tgt.y);
 return pw>0?(db-da):(da-db);
 });
 ch=vd[0];
