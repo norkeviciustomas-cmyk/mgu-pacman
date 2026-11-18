@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>BMW MGU Pac-Man Pro</title>
+<title>BMW MGU Pac-Man v3</title>
 <style>
 body{background:#0b0e14;color:#fff;font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;overflow:hidden;touch-action:none}
 .h{display:flex;justify-content:space-between;width:368px;font-size:15px;font-weight:bold;margin-bottom:4px}
@@ -18,7 +18,7 @@ button:active,button:focus{background:#0066B1;outline:none}
 <div class="h">
 <div>TAŠKAI: <span id="s">0</span></div>
 <div style="color:#FFD700">REKORDAS: <span id="hs">0</span></div>
-<div style="color:#4da6ff">LYGIS: <span id="lv">1</span></div>
+<div style="color:#4da6ff">LYGIS: <span id="lv">1</span> <small style="color:#666">v3</small></div>
 </div>
 <div id="st" class="st-bar"></div>
 <canvas id="c" width="368" height="368"></canvas>
@@ -30,7 +30,7 @@ button:active,button:focus{background:#0066B1;outline:none}
 <button onclick="init(true)">Iš naujo</button>
 </div>
 <script>
-const c=document.getElementById("c"),ctx=c.getContext("2d"),sE=document.getElementById("s"),hsE=document.getElementById("hs"),lvE=document.getElementById("lv"),stE=document.getElementById("st"),T=23,R=16,C=16,SPD=4.5;
+const c=document.getElementById("c"),ctx=c.getContext("2d"),sE=document.getElementById("s"),hsE=document.getElementById("hs"),lvE=document.getElementById("lv"),stE=document.getElementById("st"),T=23,R=16,C=16,SPD=4.8;
 const WCOLS=["#0066B1","#8A1538","#B86B00"];
 const MAPS=[
 [
@@ -105,8 +105,8 @@ function turn(s){nd=(cd+s+4)%4}
 function init(resetAll){
 if(resetAll){sc=0;lvl=1;sE.innerText=0;}
 let idx=(lvl-1)%MAPS.length;
-let L=MAPS.at(idx);
-wCol=WCOLS.at(lvl-1<WCOLS.length?lvl-1:(lvl-1)%WCOLS.length);
+let L=MAPS[idx];
+wCol=WCOLS[(lvl-1)%WCOLS.length];
 c.style.borderColor=wCol;
 m=L.map(r=>r.split(""));
 over=0;wait=0;pw=0;
@@ -124,13 +124,13 @@ lt=performance.now();
 }
 function ok(x,y){return x>=0&&x<C&&y>=0&&y<R&&m[y][x]!=="#"}
 function stepEnt(e,dt,isP){
-let gMult=Math.min(1.18,0.90+(lvl-1)*0.06);
+let gMult=Math.min(1.18,0.88+(lvl-1)*0.06);
 let step=SPD*dt*(isP?1:gMult);
 if(isP){
 let gx=Math.round(e.x),gy=Math.round(e.y);
 let dist=Math.hypot(gx-e.x,gy-e.y);
 let d=D[nd];
-if((d.x!==e.dx||d.y!==e.dy)&&dist<0.42&&ok(gx+d.x,gy+d.y)){
+if((d.x!==e.dx||d.y!==e.dy)&&dist<0.28&&ok(gx+d.x,gy+d.y)){
 e.x=gx;e.y=gy;cd=nd;e.dx=d.x;e.dy=d.y;
 }
 }
@@ -156,7 +156,7 @@ let da=Math.hypot((gx+a.x)-p.x,(gy+a.y)-p.y);
 let db=Math.hypot((gx+b.x)-p.x,(gy+b.y)-p.y);
 return pw>0?(db-da):(da-db);
 });
-ch=vd.shift();
+ch=vd[0];
 }else{
 ch=vd[Math.floor(Math.random()*vd.length)];
 }
