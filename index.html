@@ -6,53 +6,125 @@
 <title>BMW MGU Pac-Man</title>
 <style>
 body{background:#0b0e14;color:#fff;font-family:Arial;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;overflow:hidden;touch-action:none}
-.h{display:flex;justify-content:space-between;width:384px;font-size:20px;font-weight:bold;margin-bottom:8px}
+.h{display:flex;justify-content:space-between;width:368px;font-size:20px;font-weight:bold;margin-bottom:6px}
 canvas{border:3px solid #0066B1;background:#000}
-button{margin-top:8px;background:#1c2433;color:#fff;border:1px solid #0066B1;padding:8px 20px;font-size:16px;border-radius:6px}
+.btns{display:flex;gap:8px;margin-top:8px}
+button{background:#1c2433;color:#fff;border:1px solid #0066B1;padding:10px 16px;font-size:16px;border-radius:6px;cursor:pointer}
+button:active,button:focus{background:#0066B1;outline:none}
 </style>
 </head>
 <body>
 <div class="h"><div>TAŠKAI: <span id="s">0</span></div><div id="st" style="color:#FFD700"></div></div>
-<canvas id="c" width="384" height="384"></canvas>
-<button onclick="init()">Iš naujo (iDrive / Enter)</button>
+<canvas id="c" width="368" height="368"></canvas>
+<div class="btns">
+<button onclick="nd=3">▲</button>
+<button onclick="nd=2">◀</button>
+<button onclick="nd=1">▼</button>
+<button onclick="nd=0">▶</button>
+<button onclick="init()">Iš naujo</button>
+</div>
 <script>
-const c=document.getElementById("c"),ctx=c.getContext("2d"),sE=document.getElementById("s"),stE=document.getElementById("st"),T=24,R=16,C=16;
-const L=["################","#o.....##.....o#","#.###..##..###.#","#...o......o...#","#.###.####.###.#","#.....#  #.....#","#####.#  #.#####","#..o..#  #..o..#","#####.####.#####","#.....o..o.....#","#.###.####.###.#","#...o......o...#","#.###..##..###.#","#o.....##.....o#","#..............#","################"];
+const c=document.getElementById("c"),ctx=c.getContext("2d"),sE=document.getElementById("s"),stE=document.getElementById("st"),T=23,R=16,C=16;
+const L=[
+"################",
+"#o.....##.....o#",
+"#.###..##..###.#",
+"#...o......o...#",
+"#.###.#  #.###.#",
+"#.....#  #.....#",
+"#####.#  #.#####",
+"#..o..#  #..o..#",
+"#####.####.#####",
+"#.....o..o.....#",
+"#.###.####.###.#",
+"#...o......o...#",
+"#.###..##..###.#",
+"#o.....##.....o#",
+"#..............#",
+"################"
+];
 const D=[{x:1,y:0},{x:0,y:1},{x:-1,y:0},{x:0,y:-1}];
 let m=[],sc=0,over=0,pw=0,cd=0,nd=0,p={x:1,y:1,dx:1,dy:0},g=[];
 function turn(s){nd=(cd+s+4)%4}
-function init(){m=L.map(r=>r.split(""));sc=0;over=0;pw=0;sE.innerText=0;stE.innerText="";cd=0;nd=0;p={x:1,y:1,dx:1,dy:0};g=[{x:7,y:7,c:"#F00",dx:0,dy:-1},{x:8,y:7,c:"#FBF",dx:0,dy:-1},{x:7,y:6,c:"#0FF",dx:0,dy:-1},{x:8,y:6,c:"#FA0",dx:0,dy:-1},{x:7,y:5,c:"#0F0",dx:1,dy:0}]}
+function init(){
+m=L.map(r=>r.split(""));sc=0;over=0;pw=0;sE.innerText=0;stE.innerText="";cd=0;nd=0;
+p={x:1,y:1,dx:1,dy:0};
+g=[
+{x:7,y:6,c:"#F00",dx:0,dy:-1},
+{x:8,y:6,c:"#FBF",dx:0,dy:-1},
+{x:7,y:7,c:"#0FF",dx:0,dy:-1},
+{x:8,y:7,c:"#FA0",dx:0,dy:-1},
+{x:7,y:5,c:"#0F0",dx:0,dy:-1}
+];
+}
 function ok(x,y){return x>=0&&x<C&&y>=0&&y<R&&m[y][x]!=="#"}
 function upd(){
-if(over)return;if(pw>0)pw--;
-let d=D[nd];if(ok(p.x+d.x,p.y+d.y)){cd=nd;p.dx=d.x;p.dy=d.y}
+if(over)return;
+if(pw>0)pw--;
+let d=D[nd];
+if(ok(p.x+d.x,p.y+d.y)){cd=nd;p.dx=d.x;p.dy=d.y}
 if(ok(p.x+p.dx,p.y+p.dy)){p.x+=p.dx;p.y+=p.dy}
 let v=m[p.y][p.x];
 if(v==="."){m[p.y][p.x]=" ";sc+=10;sE.innerText=sc}
-else if(v==="o"){m[p.y][p.x]=" ";sc+=50;pw=30;sE.innerText=sc}
+else if(v==="o"){m[p.y][p.x]=" ";sc+=50;pw=35;sE.innerText=sc}
 if(!m.some(r=>r.includes(".")||r.includes("o"))){over=1;stE.innerText="LAIMĖJOTE!";return}
 g.forEach(gh=>{
-let vd=D.filter(k=>ok(gh.x+k.x,gh.y+k.y)),nr=vd.filter(k=>!(k.x===-gh.dx&&k.y===-gh.dy));
+let vd=D.filter(k=>ok(gh.x+k.x,gh.y+k.y));
+let nr=vd.filter(k=>!(k.x===-gh.dx&&k.y===-gh.dy));
 if(nr.length)vd=nr;
-if(vd.length){let ch=vd[Math.floor(Math.random()*vd.length)];gh.dx=ch.x;gh.dy=ch.y;gh.x+=gh.dx;gh.y+=gh.dy}
-if(gh.x===p.x&&gh.y===p.y){if(pw>0){gh.x=7;gh.y=7;sc+=200;sE.innerText=sc}else{over=1;stE.innerText="PABAIGA!"}}
-})}
+if(vd.length){
+let ch=vd[Math.floor(Math.random()*vd.length)];
+gh.dx=ch.x;gh.dy=ch.y;gh.x+=gh.dx;gh.y+=gh.dy;
+}
+if(gh.x===p.x&&gh.y===p.y){
+if(pw>0){gh.x=7;gh.y=6;gh.dx=0;gh.dy=-1;sc+=200;sE.innerText=sc}
+else{over=1;stE.innerText="PABAIGA!"}
+}
+});
+}
 function drw(){
-ctx.clearRect(0,0,384,384);
+ctx.clearRect(0,0,368,368);
 for(let r=0;r<R;r++)for(let l=0;l<C;l++){
 let v=m[r][l];
 if(v==="#"){ctx.fillStyle="#0066B1";ctx.fillRect(l*T,r*T,T,T)}
-else if(v==="."){ctx.fillStyle="#FFB8AE";ctx.beginPath();ctx.arc(l*T+12,r*T+12,3,0,7);ctx.fill()}
-else if(v==="o"){ctx.fillStyle="#FFB8AE";ctx.beginPath();ctx.arc(l*T+12,r*T+12,6.5,0,7);ctx.fill()}
+else if(v==="."){ctx.fillStyle="#FFB8AE";ctx.beginPath();ctx.arc(l*T+11.5,r*T+11.5,3,0,7);ctx.fill()}
+else if(v==="o"){ctx.fillStyle="#FFB8AE";ctx.beginPath();ctx.arc(l*T+11.5,r*T+11.5,6.5,0,7);ctx.fill()}
 }
-let rot=cd*1.57;ctx.fillStyle="#FF0";ctx.beginPath();ctx.arc(p.x*T+12,p.y*T+12,10,rot+0.6,rot+5.6);ctx.lineTo(p.x*T+12,p.y*T+12);ctx.fill();
-g.forEach(gh=>{ctx.fillStyle=pw>0?"#22F":gh.c;ctx.beginPath();ctx.arc(gh.x*T+12,gh.y*T+12,10,Math.PI,0);ctx.lineTo(gh.x*T+22,gh.y*T+22);ctx.lineTo(gh.x*T+2,gh.y*T+22);ctx.fill()})
+let rot=cd*1.57;ctx.fillStyle="#FF0";ctx.beginPath();ctx.arc(p.x*T+11.5,p.y*T+11.5,9.5,rot+0.6,rot+5.6);ctx.lineTo(p.x*T+11.5,p.y*T+11.5);ctx.fill();
+g.forEach(gh=>{
+ctx.fillStyle=pw>0?"#22F":gh.c;
+ctx.beginPath();ctx.arc(gh.x*T+11.5,gh.y*T+11.5,9.5,Math.PI,0);
+ctx.lineTo(gh.x*T+21,gh.y*T+21);ctx.lineTo(gh.x*T+2,gh.y*T+21);ctx.fill();
+});
 }
-let lw=0;window.addEventListener("wheel",e=>{e.preventDefault();if(Date.now()-lw<150)return;lw=Date.now();turn(e.deltaY>0||e.deltaX>0?1:-1)},{passive:false});
-window.addEventListener("keydown",e=>{if(e.key==="ArrowRight")nd=0;if(e.key==="ArrowDown")nd=1;if(e.key==="ArrowLeft")nd=2;if(e.key==="ArrowUp")nd=3;if(e.key==="Enter"||e.key==="r")init()});
-let tx=0,ty=0;window.addEventListener("touchstart",e=>{tx=e.touches.clientX;ty=e.touches.clientY});
-window.addEventListener("touchend",e=>{let dx=e.changedTouches.clientX-tx,dy=e.changedTouches.clientY-ty;if(Math.abs(dx)>Math.abs(dy))nd=dx>20?0:(dx<-20?2:nd);else nd=dy>20?1:(dy<-20?3:nd)});
-init();setInterval(()=>{upd();drw()},250);
+let lw=0;
+window.addEventListener("wheel",e=>{
+e.preventDefault();
+if(Date.now()-lw<120)return;
+lw=Date.now();
+turn(e.deltaY>0||e.deltaX>0?1:-1);
+},{passive:false});
+window.addEventListener("keydown",e=>{
+if(e.key==="ArrowRight")nd=0;
+if(e.key==="ArrowDown")nd=1;
+if(e.key==="ArrowLeft")nd=2;
+if(e.key==="ArrowUp")nd=3;
+if(e.key==="Enter"||e.key==="r")init();
+});
+let tx=0,ty=0;
+document.addEventListener("touchstart",e=>{
+if(e.touches.length>0){tx=e.touches.item(0).clientX;ty=e.touches.item(0).clientY;}
+});
+document.addEventListener("touchend",e=>{
+if(e.changedTouches.length>0){
+let dx=e.changedTouches.item(0).clientX-tx;
+let dy=e.changedTouches.item(0).clientY-ty;
+if(Math.abs(dx)>Math.abs(dy)){if(dx>20)nd=0;else if(dx<-20)nd=2;}
+else{if(dy>20)nd=1;else if(dy<-20)nd=3;}
+}
+});
+init();
+setInterval(()=>{upd();drw()},240);
 </script>
 </body>
 </html>
