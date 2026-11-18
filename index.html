@@ -29,6 +29,7 @@ button:active,button:focus{background:#0066B1;outline:none}
 </div>
 <script>
 const c=document.getElementById("c"),ctx=c.getContext("2d"),sE=document.getElementById("s"),lvE=document.getElementById("lv"),stE=document.getElementById("st"),T=23,R=16,C=16,SPD=4.4;
+const WCOLS=["#0066B1","#8A1538","#B86B00"];
 const MAPS=[
 [
 "################",
@@ -65,14 +66,35 @@ const MAPS=[
 "#......##......#",
 "#.####.##.####.#",
 "################"
+],
+[
+"################",
+"#o....o..o....o#",
+"#.####.##.####.#",
+"#......##......#",
+"#.###.#  #.###.#",
+"#o..#.#  #.#..o#",
+"#.#...#  #...#.#",
+"#.#.o.####.o.#.#",
+"#..............#",
+"#.####.##.####.#",
+"#o....o..o....o#",
+"#.####.##.####.#",
+"#......##......#",
+"#.##.######.##.#",
+"#..............#",
+"################"
 ]
 ];
 const D=[{x:1,y:0},{x:0,y:1},{x:-1,y:0},{x:0,y:-1}];
-let m=[],sc=0,lvl=1,over=0,wait=0,pw=0,cd=0,nd=0,p={},g=[],lt=0;
+let m=[],sc=0,lvl=1,over=0,wait=0,pw=0,cd=0,nd=0,p={},g=[],lt=0,wCol="#0066B1";
 function turn(s){nd=(cd+s+4)%4}
 function init(resetAll){
 if(resetAll){sc=0;lvl=1;}
-let L=MAPS[(lvl-1)%MAPS.length];
+let idx=(lvl-1)%MAPS.length;
+let L=MAPS.at(idx);
+wCol=WCOLS.at(lvl-1<WCOLS.length?lvl-1:(lvl-1)%WCOLS.length);
+c.style.borderColor=wCol;
 m=L.map(r=>r.split(""));
 over=0;wait=0;pw=0;
 sE.innerText=sc;lvE.innerText=lvl;stE.innerText="";
@@ -113,7 +135,7 @@ let da=Math.hypot((gx+a.x)-p.x,(gy+a.y)-p.y);
 let db=Math.hypot((gx+b.x)-p.x,(gy+b.y)-p.y);
 return pw>0?(db-da):(da-db);
 });
-ch=vd[0];
+ch=vd.shift();
 }else{
 ch=vd[Math.floor(Math.random()*vd.length)];
 }
@@ -169,7 +191,7 @@ function drw(now){
 ctx.clearRect(0,0,368,368);
 for(let r=0;r<R;r++)for(let l=0;l<C;l++){
 let v=m[r][l];
-if(v==="#"){ctx.fillStyle="#0066B1";ctx.fillRect(l*T,r*T,T,T)}
+if(v==="#"){ctx.fillStyle=wCol;ctx.fillRect(l*T,r*T,T,T)}
 else if(v==="."){ctx.fillStyle="#FFB8AE";ctx.beginPath();ctx.arc(l*T+11.5,r*T+11.5,3,0,7);ctx.fill()}
 else if(v==="o"){ctx.fillStyle="#FFB8AE";ctx.beginPath();ctx.arc(l*T+11.5,r*T+11.5,6.5,0,7);ctx.fill()}
 }
